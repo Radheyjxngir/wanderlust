@@ -1,0 +1,135 @@
+/* --- Desktop & General Styles --- */
+.listing-link {
+    text-decoration: none;
+    color: #222222 !important;
+}
+
+.card {
+    border: none !important;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    border-radius: 1.5rem !important; 
+    transition: 0.2s ease-in-out;
+    background-color: transparent !important; /* कार्ड को बैकग्राउंड साफ राखण खातिर */
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card-img-top {
+    height: 18rem !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: 1.5rem !important;
+}
+/* Create Page Button */
+.add-btn {
+    background-color: #fe5100 !important; /* Airbnb आळो ओरेन्ज-रेड रंग */
+    border: none !important;
+    width: 120px;
+    height: 45px;
+    border-radius: 0.5rem !important;
+    font-weight: 600;
+}
+
+.add-btn:hover {
+    background-color: #d14100 !important;
+}
+
+/* Input Boxes Roundness */
+.form-control {
+    border-radius: 0.5rem !important;
+    padding: 0.6rem !important;
+    border: 1px solid #ced4da !important;
+}
+
+.form-label {
+    font-weight: 500;
+    color: #444;
+}
+footer {
+    border-top: 1px solid #ebebeb;
+    background-color: #f7f7f7;
+    height: 8rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.f-info {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.f-info-socials, .f-info-links, .f-info-brand {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.f-info-socials i {
+    font-size: 1.2rem;
+    margin-right: 1rem;
+    color: #222222;
+    transition: 0.2s;
+}
+
+.f-info-socials i:hover {
+    color: #fe5100; /* Airbnb ओरेन्ज */
+    transform: scale(1.2);
+}
+
+.f-info-links a {
+    text-decoration: none;
+    color: #222222;
+    margin-right: 1rem;
+}
+
+.f-info-links a:hover {
+    text-decoration: underline;
+}
+
+.f-info-brand {
+    font-size: 0.9rem;
+    color: #717171;
+}
+.show-img {
+    height: 25rem !important;
+    width: 100% !important;
+    object-fit: cover !important;
+    border-radius: 1.5rem !important;
+}
+
+/* --- MEDIA QUERIES (Responsiveness) --- */
+
+/* १. टैबलेट खातिर (Tablets - 768px सूं नीचे) */
+@media (max-width: 768px) {
+    .card-img-top {
+        height: 15rem !important; /* टैबलेट पर फोटो थोड़ी छोटी */
+    }
+    .navbar {
+        padding: 0.5rem 1rem !important;
+    }
+}
+
+/* २. मोबाइल खातिर (Phones - 576px सूं नीचे) */
+@media (max-width: 576px) {
+    .card-img-top {
+        height: 20rem !important; /* मोबाइल पर कार्ड पूरा चौड़ा होसी, तो फोटो बड़ी अच्छी दिखेगी */
+    }
+    .card {
+        margin-bottom: 1.5rem;
+    }
+    h3 {
+        font-size: 1.5rem; /* हेडिंग थोड़ी छोटी */
+        margin-left: 0.5rem;
+    }
+}
