@@ -8,6 +8,7 @@ const ExpressError = require("../utils/ExpressError.js");
 const Review = require("../models/review.js");
 const Listing = require("../models/listing.js");
 const { FALLBACK_MONGO_URL } = require("../config/db.js");
+const { isLoggedIn, isReviewAuthor, validateReview } = require("../middleware.js");
 
 const fallbackConnection = mongoose.createConnection(FALLBACK_MONGO_URL);
 const FallbackListing = fallbackConnection.model("Listing", Listing.schema);
@@ -16,26 +17,31 @@ const FallbackReview = fallbackConnection.model("Review", Review.schema);
 function buildReviewSnapshot(reviewDoc) {
     return {
         reviewId: reviewDoc._id,
+        authorName: reviewDoc.authorName,
         comment: reviewDoc.comment,
         rating: reviewDoc.rating,
         createdAt: reviewDoc.createdAt
     };
 }
 
-router.post("/", wrapAsync(async (req, res) => {
+router.post("/", isLoggedIn, validateReview, wrapAsync(async (req, res) => {
     if (!req.body.review) {
         throw new ExpressError(400, "Review data is required!");
     }
 
     const listingId = req.params.id.trim();
 
+    // 1. पैलां Review ऑब्जेक्ट बणाओ
     const newReview = new Review({
         comment: req.body.review.comment,
-        rating: Number(req.body.review.rating)
+        rating: Number(req.body.review.rating),
+        authorName: req.user.username,
+        author: req.user._id // अठै author जोड़ दियो
     });
 
     await newReview.save();
 
+    // 2. Primary DB में अपडेट करण की कोसिस
     let listing = await Listing.findByIdAndUpdate(
         listingId,
         {
@@ -51,12 +57,16 @@ router.post("/", wrapAsync(async (req, res) => {
         return res.redirect(`/listings/${listing._id}`);
     }
 
+    // 3. जे Primary में कोनी मिल्यो तो Fallback DB चेक करो
     const fallbackReview = new FallbackReview({
         comment: req.body.review.comment,
-        rating: Number(req.body.review.rating)
+        rating: Number(req.body.review.rating),
+        authorName: req.user.username,
+        author: req.user._id
     });
 
     await fallbackReview.save();
+    
     listing = await FallbackListing.findByIdAndUpdate(
         listingId,
         {
@@ -69,23 +79,26 @@ router.post("/", wrapAsync(async (req, res) => {
     );
 
     if (!listing) {
+        // जे कठै ई कोनी मिल्यो तो बणायाड़ा रिव्यू डिलीट करो
         await Review.findByIdAndDelete(newReview._id);
         await FallbackReview.findByIdAndDelete(fallbackReview._id);
         throw new ExpressError(404, "Listing not found!");
     }
 
+    // फालतू प्राइमरी रिव्यू हटाओ क्यूंकि डेटा Fallback में गयो है
     await Review.findByIdAndDelete(newReview._id);
 
     res.redirect(`/listings/${listing._id}`);
 }));
 
-router.delete("/:reviewId", wrapAsync(async (req, res) => {
+// DELETE Route में reviewId चेक करण को तरीको सही करयो है
+router.delete("/:reviewId", isLoggedIn, isReviewAuthor, wrapAsync(async (req, res) => {
     const { id, reviewId } = req.params;
 
     let listing = await Listing.findByIdAndUpdate(id, {
         $pull: {
             reviews: reviewId,
-            reviewSnapshots: { reviewId }
+            reviewSnapshots: { reviewId: new mongoose.Types.ObjectId(reviewId) }
         }
     });
 
@@ -97,7 +110,7 @@ router.delete("/:reviewId", wrapAsync(async (req, res) => {
     listing = await FallbackListing.findByIdAndUpdate(id, {
         $pull: {
             reviews: reviewId,
-            reviewSnapshots: { reviewId }
+            reviewSnapshots: { reviewId: new mongoose.Types.ObjectId(reviewId) }
         }
     });
 

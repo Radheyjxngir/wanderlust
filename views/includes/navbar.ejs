@@ -1,21 +1,149 @@
-<nav class="navbar navbar-expand-md navbar-light bg-light" border-bottom sticy-top>
+<!-- Navbar Structure -->
+<nav class="navbar navbar-expand-md navbar-light bg-light border-bottom sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="#"><i class="fa-solid fa-compass"></i> wanderLust</a>
+    <!-- लोगो -->
+    <a class="navbar-brand" href="/listings"><i class="fa-solid fa-hotel"></i> Luxury Stay</a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav">
+      <!-- लेफ्ट साइड की लिंक -->
+      <ul class="navbar-nav mb-2 mb-md-0">
         <li class="nav-item">
           <a class="nav-link" href="/listings">All Listings</a>
         </li>
+      </ul>
+
+      <!-- बीच में सर्च बार (अलाइनमेंट फिक्स) -->
+      <div class="nav-search-wrap">
+        <form action="/listings" method="GET" class="d-flex search-form" role="search">
+          <input name="q" class="form-control search-input" type="search" placeholder="Search Luxury Stays" aria-label="Search">
+          <button class="btn btn-search" type="submit">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+        </form>
+      </div>
+
+      <!-- राइट साइड की लिंक्स -->
+      <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item">
-          <a class="nav-link" href="/listings/new">Add New Listing</a>
+          <a class="btn btn-outline-danger btn-sm rounded-pill px-3 ms-0 ms-md-2" href="/listings/new">Add New Listing</a>
         </li>
-        <li class="nav-item">
-         
-        </li>
+        <% if (!currentUser) { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/signup"><b>Sign Up</b></a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Log In</a>
+          </li>
+        <% } else { %>
+          <li class="nav-item">
+            <a class="nav-link" href="/logout">Log Out</a>
+          </li>
+        <% } %>
       </ul>
     </div>
   </div>
 </nav>
+
+<!-- CSS Styling (In-line) -->
+<style>
+    /* नेवबार की हाइट और बैकग्राउंड */
+    .navbar {
+        background-color: #fff !important;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+    }
+
+    .navbar-brand {
+        color: #fe424d !important;
+        font-weight: 800;
+        font-size: 1.35rem;
+        letter-spacing: 0.02em;
+        text-transform: capitalize;
+    }
+
+    /* सर्च बार स्टाइल - Airbnb लुक */
+    .search-form {
+        border: 1px solid #ddd;
+        border-radius: 30px;
+        padding: 4px 4px 4px 15px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+        background-color: #fff;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .search-form:hover {
+        box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+    }
+
+    .search-input {
+        border: none !important;
+        font-size: 0.85rem;
+        width: 280px !important; /* डेस्कटॉप चौड़ाई */
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .btn-search {
+        background-color: #fe424d;
+        color: #fff;
+        border-radius: 50%;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: 0.2s;
+        box-shadow: 0 10px 20px rgba(254, 66, 77, 0.2);
+    }
+
+    .btn-search:hover {
+        background-color: #e31c5f;
+        color: #fff;
+    }
+
+    /* लिंक्स का स्टाइल */
+    .nav-link {
+        color: #222 !important;
+        font-size: 0.95rem;
+        font-weight: 500;
+        padding: 0.55rem 0.75rem;
+        transition: color 0.2s ease, background 0.2s ease;
+    }
+
+    .nav-link:hover {
+        color: #fe424d !important;
+        background: rgba(254, 66, 77, 0.12);
+        border-radius: 0.75rem;
+    }
+
+    .navbar-nav .btn {
+        font-weight: 700;
+        letter-spacing: 0.01em;
+    }
+
+    .btn-outline-danger {
+        border-color: #fe424d !important;
+        color: #fe424d !important;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #fe424d !important;
+        color: #fff !important;
+        border-color: #fe424d !important;
+    }
+
+    /* मोबाइल स्क्रीन खातर सुधार */
+    @media (max-width: 992px) {
+        .search-input {
+            width: 100% !important;
+        }
+        .search-form {
+            margin: 10px 0;
+            width: 100%;
+        }
+    }
+</style>

@@ -1,14 +1,29 @@
 <% if (typeof success !== "undefined" && success && success.length) { %>
-    <div class="alert alert-success alert-dismissible fade show col-6 offset-3" role="alert">
-        <%= success[0] %>
-        <button class="alert alert-success alert-dismissible fade show col-6 offset-3" role="alert" type="button" data-bs-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>   
+    <div class="flash-wrapper">
+        <div class="alert alert-success alert-dismissible fade show flash-alert flash-success" role="alert">
+            <div class="flash-content">
+                <span class="flash-icon"><i class="fa-solid fa-circle-check"></i></span>
+                <div class="flash-text">
+                    <strong>Success</strong>
+                    <p><%= success[0] %></p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     </div>
 <% } %>
 
 <% if (typeof error !== "undefined" && error && error.length) { %>
-    <div class="alert alert-danger" role="alert">
-        <%= error[0] %>
+    <div class="flash-wrapper">
+        <div class="alert alert-danger alert-dismissible fade show flash-alert flash-error" role="alert">
+            <div class="flash-content">
+                <span class="flash-icon"><i class="fa-solid fa-circle-exclamation"></i></span>
+                <div class="flash-text">
+                    <strong>Oops</strong>
+                    <p><%= error[0] %></p>
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     </div>
 <% } %>

@@ -1,11 +1,11 @@
 <% layout('layout/boilerplate') %>
 
-<div class="row mt-3">
-    <div class="col-8 offset-2">
+<div class="row mt-3 form-page">
+    <div class="col-12 col-lg-8 offset-lg-2">
         <br><br>
         <h3 class="mb-3">Create a New Listing</h3>
         
-        <form action="/listings" method="POST" novalidate class="needs-validation">
+        <form action="/listings" method="POST" novalidate class="needs-validation listing-upload-form" enctype="multipart/form-data">
             
             <div class="mb-3">
                 <label for="title" class="form-label">Title</label>
@@ -20,10 +20,24 @@
                 <div class="invalid-feedback">Please Describe</div>
             </div>
 
+        
+
             <div class="mb-3">
-                <label for="image" class="form-label">Image Link</label>
-                <input type="text" name="listing[image]" id="image" placeholder="Enter image URL/Link" class="form-control">
+                <label for="images" class="form-label">Upload listing photos</label>
+                <input type="file" name="listing[images]" id="images" class="form-control listing-images-input" accept="image/*" multiple data-preview-target="listing-upload-preview">
+                <div class="form-text">1 se 6 photos upload kar sakte ho.</div>
+                <div id="listing-upload-preview" class="upload-preview-grid mt-3"></div>
+            </div>
+
+            <div class="upload-progress-card d-none mb-3" data-upload-progress>
+                <div class="upload-progress-head">
+                    <strong>Uploading photos...</strong>
+                    <span data-upload-text>0%</span>
                 </div>
+                <div class="upload-progress-track">
+                    <div class="upload-progress-bar" data-upload-bar></div>
+                </div>
+            </div>
 
             <div class="row">
                 <div class="mb-3 col-md-4">

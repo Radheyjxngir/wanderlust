@@ -1,84 +1,133 @@
 <% layout('layout/boilerplate') %>
 
-<div class="container mt-3">
-    <div class="row">
-        <div class="col-12 col-md-8 offset-md-2">
-            <h3 class="fw-bold mt-3"><%= listing.title %></h3>
-            <div class="card show-card listing-card border-0">
-                <img 
-                    src="<%= listing.image && listing.image.url ? listing.image.url : listing.image %>" 
-                    class="card-img-top show-img" 
-                    alt="listing_image"
-                >
-                <div class="card-body px-1">
-                    <p class="card-text text-muted mb-2">Hosted by Radheyshyam</p>
-                    <p class="card-text"><%= listing.description %></p>
-                    <p class="card-text fw-bold fs-5">
-                        &#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "0" %> / night
-                    </p>
-                    <p class="card-text">
-                        <i class="fa-solid fa-location-dot me-2 text-danger"></i>
-                        <%= listing.location %>, <%= listing.country %>
-                    </p>
-                </div>
+<% const galleryImages = (listing.galleryImageUrls && listing.galleryImageUrls.length)
+    ? listing.galleryImageUrls
+    : [listing.imageShowUrl || listing.imageFallbackUrl || listing.image || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=60'];
+const hasMultipleGallery = galleryImages.length > 1;
+%>
+
+<div class="show-hero-section">
+    <div class="listing-gallery gallery-shell" data-gallery-images='<%= JSON.stringify(galleryImages) %>' data-gallery-index="0">
+        <div class="gallery-main-wrap">
+            <span class="gallery-count-badge">
+                <i class="fa-regular fa-images"></i>
+                <%= galleryImages.length %> photos
+            </span>
+            <div class="gallery-hero-overlay">
+                <p class="hero-badge">Luxury Stay</p>
+                <h1 class="hero-title"><%= listing.title %></h1>
+
+                <!-- डिस्क्रिप्शन ने अठै छोटो करके लगा दियो है -->
+                <p class="hero-description"><%= listing.description %></p>
+
+                <p class="hero-meta"><i class="fa-solid fa-location-dot"></i> <%= listing.location %>, <%= listing.country %></p>
+                <p class="hero-host">Hosted by <strong><%= listing.owner && listing.owner.username ? listing.owner.username : "LuxeStay Host" %></strong></p>
+                <p class="hero-price">&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "0" %> / night</p>
             </div>
+            <% if (hasMultipleGallery) { %>
+                <button type="button" class="gallery-nav-button prev" data-gallery-prev aria-label="Previous photo">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button type="button" class="gallery-nav-button next" data-gallery-next aria-label="Next photo">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            <% } %>
+            <img
+                src="<%= galleryImages[0] %>"
+                class="card-img-top show-img gallery-main-image is-visible"
+                alt="listing_image"
+                loading="eager"
+                decoding="async"
+                data-gallery-main
+                onerror="this.onerror=null;this.src='<%= listing.imageFallbackUrl || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=60' %>';"
+            >
         </div>
     </div>
+</div>
 
-    <hr />
+<div class="container py-4">
+    <!-- नीचै आळो फालतू बड़ा कार्ड हटा दियो है ताकि पेज साफ दिखे -->
 
     <div class="row mb-5">
         <div class="col-12 col-md-8 offset-md-2">
-            <div class="d-flex gap-3 mb-4">
-                <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn px-4 py-2">Edit</a>
-                <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="m-0">
-                    <button class="btn btn-danger delete-btn px-4 py-2">Delete</button>
-                </form>
-            </div>
-            
-            <hr />
-
-            <h4>Leave a Review</h4>
-            <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
-                <div class="mb-3 mt-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <input type="range" name="review[rating]" id="rating" min="1" max="5" value="3" class="form-range" step="1" required>
+            <!-- Edit/Delete Buttons for Owner -->
+            <% if (currentUser && listing.owner && currentUser._id.equals(listing.owner._id)) { %>
+                <div class="d-flex gap-3 mb-4 flex-wrap">
+                    <a href="/listings/<%= listing._id %>/edit" class="btn btn-dark edit-btn px-4 py-2 flex-fill">Edit</a>
+                    <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="m-0 flex-fill">
+                        <button class="btn btn-danger delete-btn px-4 py-2">Delete</button>
+                    </form>
                 </div>
+            <% } %>
 
-                <div class="mb-3">
-                    <label for="comment" class="form-label">Comment</label>
-                    <textarea class="form-control" id="comment" name="review[comment]" rows="4" required></textarea>
-                    <div class="invalid-feedback">Please add some comments for review</div>
-                </div>
+            <hr class="show-section-divider" />
 
-                <button type="submit" class="btn btn-outline-dark">Submit Review</button>
-            </form>
+            <!-- Review Form -->
+            <% if(currentUser) { %>
+                <section class="review-form-panel">
+                    <div class="review-section-heading">
+                        <p class="section-kicker">Your experience</p>
+                        <h4>Leave a Review</h4>
+                    </div>
+                    <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation">
+                        <div class="mb-3">
+                            <label class="form-label">Rating</label>
+                            <div class="star-rating" role="radiogroup" aria-label="Rating">
+                                <% for (let i = 5; i >= 1; i--) { %>
+                                    <input type="radio" name="review[rating]" id="rating-<%= i %>" value="<%= i %>" <%= i === 3 ? 'checked' : '' %> required>
+                                    <label for="rating-<%= i %>" title="<%= i %> stars"><i class="fa-solid fa-star"></i></label>
+                                <% } %>
+                            </div>
+                        </div>
 
-            <hr>
+                        <div class="mb-3">
+                            <label for="comment" class="form-label">Comment</label>
+                            <textarea class="form-control review-comment-box" id="comment" name="review[comment]" rows="4" required></textarea>
+                            <div class="invalid-feedback">Please add some comments for review</div>
+                        </div>
 
+                        <button type="submit" class="btn review-submit-btn">Submit Review</button>
+                    </form>
+                </section>
+                <hr class="show-section-divider">
+            <% } %>
+
+            <!-- All Reviews Section -->
             <% if(listing.reviews.length > 0) { %>
-                <div class="row">
-                    <p><b>All Reviews</b></p>
+                <section class="reviews-section">
+                    <div class="review-section-heading">
+                        <p class="section-kicker"><%= listing.reviews.length %> guest review<%= listing.reviews.length === 1 ? "" : "s" %></p>
+                        <h4>All Reviews</h4>
+                    </div>
+                    <div class="reviews-grid">
                     <% for(let review of listing.reviews) { %>
-                        <div class="card col-5 ms-3 mb-3 border">
-                            <div class="card-body p-2">
-                                <h6 class="card-title fw-bold">Anonymous</h6>
-                                <p class="card-text mb-1"><%= review.comment %></p>
-                                <p class="card-text text-warning mb-2">
+                        <article class="review-card">
+                            <div class="review-card-top">
+                                <div class="review-avatar">
+                                    <i class="fa-regular fa-user"></i>
+                                </div>
+                                <div>
+                                    <h6>@<%= review.authorDisplayName || (review.author && review.author.username) || "Anonymous" %></h6>
+                                    <p class="review-rating-display" aria-label="<%= review.rating %> out of 5 stars">
                                     <% for(let i=0; i<review.rating; i++) { %>
                                         <i class="fa-solid fa-star"></i>
                                     <% } %>
                                     <% for(let i=review.rating; i<5; i++) { %>
                                         <i class="fa-regular fa-star"></i>
                                     <% } %>
-                                </p>
-                                <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST">
-                                    <button class="btn btn-sm btn-dark">Delete</button>
-                                </form>
+                                    </p>
+                                </div>
                             </div>
-                        </div>
+                            <p class="review-comment"><%= review.comment %></p>
+                                <% if(currentUser && review.author && currentUser._id.equals(review.author._id)) { %>
+                                    <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" class="review-actions">
+                                        <button class="btn btn-sm btn-dark review-delete-btn">Delete</button>
+                                    </form>
+                                <% } %>
+                        </article>
                     <% } %>
-                </div>
+                    </div>
+                </section>
             <% } %>
         </div>
     </div>

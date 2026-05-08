@@ -1,27 +1,254 @@
-<% layout('layout/boilerplate') %> 
-<%= success %>
-<div class="container mt-3">
-    <h3 class="mb-3">All Listings</h3>
-    
-    <a href="/listings/new" class="btn btn-dark mb-4">Add New Listing</a>
+<% layout('layout/boilerplate') %>
 
-    <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-md-2 row-cols-1 g-4">
-        <% for(let listing of allListings) { %>
-            <div class="col">
-                <a href="/listings/<%= listing._id %>" class="listing-link">
-                    <div class="card h-100 listing-card">
-                        <img src="<%= listing.image && listing.image.url ? listing.image.url : listing.image %>" class="card-img-top" alt="listing image">
-                        
-                        <div class="card-body px-1">
-                            <p class="card-text">
-                                <b><%= listing.title %></b> <br>
-                                <span class="text-muted"><%= listing.location %>, <%= listing.country %></span> <br>
-    <b>&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "Price not available" %></b> / night
-                            </p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+<style>
+    .filters {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        overflow-x: auto;
+        padding: 0.75rem 0.25rem 1rem;
+        gap: 1.25rem;
+    }
+
+    .filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filter {
+        text-align: center;
+        min-width: 72px;
+        opacity: 0.82;
+        transition: 0.2s;
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .filter i {
+        font-size: 1.15rem;
+        color: #444;
+    }
+
+    .filter:hover {
+        opacity: 1;
+        border-bottom: 2px solid #222;
+    }
+
+    .filter-active {
+        opacity: 1;
+        border-bottom: 2px solid #fe424d;
+    }
+
+    .filter-active i,
+    .filter-active p {
+        color: #fe424d;
+    }
+
+    .filter p {
+        font-size: 0.75rem;
+        margin-top: 4px;
+        margin-bottom: 0;
+        white-space: nowrap;
+    }
+
+    .listing-page {
+        padding-bottom: 2rem;
+    }
+
+    .listing-page-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .listing-page-header h3 {
+        margin-bottom: 0;
+    }
+
+    .listing-grid {
+        margin-top: 0.5rem;
+    }
+
+    .listing-location-line,
+    .listing-highlight-line,
+    .listing-price-line {
+        display: flex;
+        align-items: center;
+        gap: 0.38rem;
+        min-width: 0;
+    }
+
+    .listing-location-line i {
+        color: #fe424d;
+        font-size: 0.82rem;
+    }
+
+    .listing-highlight-line {
+        margin-top: 0.38rem;
+        color: #7a685f;
+        font-size: 0.88rem;
+    }
+
+    .listing-price-line {
+        margin-top: 0.45rem;
+        color: #222;
+        font-size: 0.96rem;
+    }
+
+    .listing-highlight-line i {
+        color: #f0a500;
+        font-size: 0.8rem;
+    }
+
+    .filter-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+    }
+
+    .filter-summary-text {
+        margin: 0;
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .no-results-box {
+        padding: 1.25rem;
+        border: 1px dashed #d7d7d7;
+        border-radius: 1rem;
+        background: #fafafa;
+        text-align: center;
+        color: #666;
+    }
+
+    .clear-filter {
+        color: #fe424d;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    @media (max-width: 576px) {
+        .filters {
+            gap: 1rem;
+            padding: 0.5rem 0 0.85rem;
+        }
+
+        .filter {
+            min-width: 68px;
+        }
+
+        .filter i {
+            font-size: 1.05rem;
+        }
+
+        .listing-page {
+            padding-inline: 0.35rem;
+        }
+
+        .listing-page-header {
+            align-items: stretch;
+            margin-bottom: 1rem;
+        }
+
+        .listing-page-header .btn {
+            width: 100%;
+        }
+
+        .filter-summary {
+            align-items: flex-start;
+        }
+
+        .listing-highlight-line {
+            font-size: 0.82rem;
+        }
+
+        .listing-price-line {
+            font-size: 0.82rem;
+        }
+    }
+</style>
+
+<div class="filters">
+    <% for (let filter of filterOptions) { %>
+        <a
+            href="/listings?filter=<%= filter.key %>"
+            class="filter <%= activeFilter === filter.key ? 'filter-active' : '' %>"
+        >
+            <div><i class="<%= filter.icon %>"></i></div>
+            <p><%= filter.label %></p>
+        </a>
+    <% } %>
+</div>
+
+
+<%= success %>
+<div class="container mt-3 listing-page">
+    <div class="listing-page-header">
+        <h3>All Listings</h3>
+    </div>
+
+    <div class="filter-summary">
+        <p class="filter-summary-text">
+            <% if (activeFilter && searchQuery) { %>
+                Showing <%= allListings.length %> listing(s) for <strong><%= filterOptions.find((item) => item.key === activeFilter)?.label %></strong> matching "<strong><%= searchQuery %></strong>"
+            <% } else if (activeFilter) { %>
+                Showing <%= allListings.length %> listing(s) for <strong><%= filterOptions.find((item) => item.key === activeFilter)?.label %></strong>
+            <% } else if (searchQuery) { %>
+                Showing <%= allListings.length %> listing(s) matching "<strong><%= searchQuery %></strong>"
+            <% } else { %>
+                Showing all <%= allListings.length %> listing(s)
+            <% } %>
+        </p>
+        <% if (activeFilter || searchQuery) { %>
+            <a href="/listings" class="clear-filter">Clear filter</a>
         <% } %>
     </div>
+
+    <% if (!allListings.length) { %>
+        <div class="no-results-box">
+            No listings found<% if (searchQuery) { %> for "<strong><%= searchQuery %></strong>"<% } %>. Try another destination or add a new listing.
+        </div>
+    <% } else { %>
+        <div class="row row-cols-xxl-4 row-cols-lg-3 row-cols-md-2 row-cols-1 g-4 listing-grid">
+            <% for(let listing of allListings) { %>
+                <div class="col">
+                    <a href="/listings/<%= listing._id %>" class="listing-link">
+                        <div class="card h-100 listing-card">
+                            <img
+                                src="<%= listing.imageCardUrl || (listing.image && listing.image.url ? listing.image.url : listing.image) %>"
+                                class="card-img-top"
+                                alt="listing image"
+                                loading="lazy"
+                                decoding="async"
+                                onerror="this.onerror=null;this.src=`<%= listing.imageFallbackUrl || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=60' %>`;"
+                            >
+
+                            <div class="card-body">
+                                <p class="card-text">
+                                    <b><%= listing.title %></b>
+                                    <span class="text-muted listing-location-line">
+                                        <i class="fa-solid fa-location-dot"></i>
+                                        <span><%= listing.location %>, <%= listing.country %></span>
+                                    </span>
+                                    <span class="listing-highlight-line">
+                                        <i class="<%= listing.highlight && listing.highlight.icon ? listing.highlight.icon : 'fa-solid fa-hotel' %>"></i>
+                                        <span><%= listing.highlight && listing.highlight.label ? listing.highlight.label : 'Comfort Stay' %></span>
+                                    </span>
+                                    <span class="listing-price-line">
+                                        <b>&#8377; <%= listing.price ? listing.price.toLocaleString("en-IN") : "Price not available" %></b> / night
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% } %>
+        </div>
+    <% } %>
 </div>
