@@ -15,7 +15,6 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
-const MongoStore = require("connect-mongo").MongoStore;
 const flash = require("connect-flash");
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
@@ -47,12 +46,14 @@ app.engine("ejs", ejsMate);
 app.use(express.static(path.join(__dirname, "/public")));
 
 // Session Options
-const store = MongoStore.create({
-  mongoUrl: MONGO_URL,
-  crypto: {
-    secret: process.env.SECRET,
-  },
-  touchAfter: 24 * 60 * 60,
+const { MongoStore } = require('connect-mongo');
+
+const store = new MongoStore({
+    mongoUrl: MONGO_URL, // थारो MongoDB Atlas को URL
+    crypto: {
+        secret: process.env.SECRET, // .env में SECRET होना ज़रूरी है
+    },
+    touchAfter: 24 * 3600, // 24 घंटों के लिए
 });
 
 store.on("error", (err) => {
@@ -137,6 +138,9 @@ app.use((err, req, res, next) => {
   res.status(statusCode).render("error.ejs", { message });
 });
 
-app.listen(8080, () => {
-  console.log("server is listening to port 8080");
+// Port variable बणाओ
+const port = process.env.PORT || 8080;
+
+app.listen(port, () => {
+  console.log(`server is listening to port ${port}`);
 });
